@@ -11,7 +11,10 @@ from sqlalchemy.orm import mapperlib
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
-from sqlalchemy.orm.query import _ColumnEntity
+try:
+    from sqlalchemy.orm.query import _ColumnEntity
+except ImportError:  # SQAlchemy >= 1.4
+    from sqlalchemy.orm.context import _ColumnEntity
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.orm.util import AliasedInsp
 
@@ -70,8 +73,9 @@ def get_class_by_table(base, table, data=None):
     :return: Declarative class or None.
     """
     found_classes = set(
-        c for c in base._decl_class_registry.values()
-        if hasattr(c, '__table__') and c.__table__ is table
+        c
+        for c in base._decl_class_registry.values()
+        if hasattr(c, "__table__") and c.__table__ is table
     )
     if len(found_classes) > 1:
         if not data:
